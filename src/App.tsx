@@ -94,39 +94,51 @@ function App() {
   }, [input]);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Typing Game</h1>
-      <p>
-        {currentWordIndex} / {textWords.length}
-      </p>
-      <div style={{ marginBottom: '10px', fontSize: '18px' }}>
-        {textWords.map((word, idx) => {
-          return (
-            <span key={idx} style={{ marginRight: '5px' }}>
-              {word.split('').map((char, charIdx) => {
-                const isCurrentWord = idx === currentWordIndex;
-                const isCorrect = isCurrentWord && input[charIdx] === char;
-                const isIncorrect = isCurrentWord && input[charIdx] && input[charIdx] !== char;
-                return (
-                  <span
-                    key={charIdx}
-                    style={{
-                      color: isCorrect ? 'green' : isIncorrect ? 'red' : 'black',
-                    }}
-                  >
-                    {char}
-                  </span>
-                );
-              })}
-            </span>
-          );
-        })}
-      </div>
-      <input ref={inputRef} type="hidden" value={input} onChange={handleInputChange} />
-      <div style={{ marginTop: '20px' }}>
-        <p>WPM: {calculateWPM()}</p>
-        <p>Accuracy: {accuracy()}%</p>
-        <button onClick={resetGame}>Restart</button>
+    <div className="h-full flex flex-col items-center">
+      <div className="container">
+        <div className="header">
+          <h1 className="text-5xl font-semibold">Typing Game</h1>
+        </div>
+
+        <div className="mt-32 flex flex-col">
+          <p className="ml-[0.5em] text-2xl">
+            {currentWordIndex} / {textWords.length}
+          </p>
+          <div className="words">
+            {textWords.map((word, idx) => {
+              return (
+                <div key={idx} className="word">
+                  {word.split('').map((char, charIdx) => {
+                    const isCurrentWord = idx === currentWordIndex;
+                    const isCorrect = isCurrentWord && input[charIdx] === char;
+                    const isIncorrect = isCurrentWord && input[charIdx] && input[charIdx] !== char;
+                    return (
+                      <div
+                        key={charIdx}
+                        style={{
+                          color: isCorrect ? 'green' : isIncorrect ? 'red' : 'black',
+                        }}
+                      >
+                        {char}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          <input ref={inputRef} type="hidden" value={input} onChange={handleInputChange} />
+
+          {endTime && (
+            <div className="flex flex-col items-center mt-8 gap-4">
+              <div className="flex flex-row gap-4">
+                <p>WPM: {calculateWPM()}</p>
+                <p>Accuracy: {accuracy()}%</p>
+              </div>
+              <button onClick={resetGame}>Restart</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
