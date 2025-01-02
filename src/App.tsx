@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
+import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+type Checked = DropdownMenuCheckboxItemProps['checked'];
+
 function App() {
   const [text, setText] = useState('Type this as fast as you can!');
   const [input, setInput] = useState('');
@@ -90,14 +103,38 @@ function App() {
     };
   }, [input]);
 
+  const [showStatusBar, setShowStatusBar] = useState<Checked>(true);
+  const [showActivityBar, setShowActivityBar] = useState<Checked>(false);
+  const [showPanel, setShowPanel] = useState<Checked>(false);
+
   return (
     <div className="h-full flex flex-col items-center">
       <div className="container">
         <div className="header">
           <h1 className="text-5xl font-semibold">Typing Game</h1>
         </div>
-
         <div className="mt-32 flex flex-col">
+          <div className="flex flex-col items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="default">Change mode</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem checked={showStatusBar} onCheckedChange={setShowStatusBar}>
+                  Random 20 words
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showActivityBar} onCheckedChange={setShowActivityBar}>
+                  Random 50 words
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem checked={showPanel} onCheckedChange={setShowPanel}>
+                  Random qoute
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           <p className="ml-[0.5em] text-2xl">
             {currentWordIndex} / {textWords.length}
           </p>
