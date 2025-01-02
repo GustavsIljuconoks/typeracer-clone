@@ -17,27 +17,24 @@ function App() {
 
     if (!startTime) setStartTime(new Date());
 
-    if (currentWordIndex + 1 == textWords.length) {
-      if (value.slice(-1) === textWords[currentWordIndex].slice(-1)) {
-        setCurrentWordIndex((prev) => prev + 1);
-        setEndTime(new Date());
-      }
+    const currentWord = textWords[currentWordIndex];
+    let correctCharCount = 0;
 
-      if (value.endsWith(' ')) {
-        setEndTime(new Date());
+    // Calculate correct characters typed so far
+    for (let i = 0; i < Math.min(value.length, currentWord.length); i++) {
+      if (value[i] === currentWord[i] && currentWord[i] !== ' ') {
+        correctCharCount++;
       }
     }
 
     if (value.endsWith(' ')) {
-      const currentWord = value.trim();
-      if (currentWord === textWords[currentWordIndex]) {
-        setCorrectChars((prev) => prev + currentWord.length);
-      }
+      setCorrectChars((prev) => prev + correctCharCount);
       setCurrentWordIndex((prev) => prev + 1);
       setInput('');
     }
 
-    if (currentWordIndex === textWords.length - 1 && value.trim() === textWords[currentWordIndex]) {
+    if (currentWordIndex === textWords.length - 1 && value.trim().length >= currentWord.length) {
+      setCorrectChars((prev) => prev + correctCharCount);
       setEndTime(new Date());
     }
   };
@@ -50,7 +47,7 @@ function App() {
 
   const accuracy = () => {
     if (input.length === 0) return 0;
-    return Math.round((correctChars / textWords.join(' ').length) * 100);
+    return Math.round((correctChars / textWords.join('').length) * 100);
   };
 
   const resetGame = () => {
