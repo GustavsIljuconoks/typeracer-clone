@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { generate } from 'random-words';
 import './App.css';
 
 import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
@@ -21,12 +22,19 @@ function App() {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [correctChars, setCorrectChars] = useState(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [textWords, setTextWords] = useState(text.split(' '));
+  const textWords = useMemo(() => text.split(' '), [text]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [wordCount, setWordCount] = useState<number>(20);
+  const [quote, setQuote] = useState<boolean>(false);
+  const [showFirstBar, setShowFirstBar] = useState<Checked>(true);
+  const [showSecondBar, setShowSecondBar] = useState<Checked>(false);
+  const [showQuote, setShowQuote] = useState<Checked>(false);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
+    setShowDropdown(false);
 
     if (!startTime) setStartTime(new Date());
 
@@ -63,12 +71,38 @@ function App() {
     return Math.round((correctChars / textWords.join('').length) * 100);
   };
 
-  const resetGame = () => {
+  const resetGame = async () => {
+    const newText = quote ? await getRandomQuote() : generateRandomWords();
+    setText(newText);
     setInput('');
     setStartTime(null);
     setEndTime(null);
     setCorrectChars(0);
     setCurrentWordIndex(0);
+    setShowDropdown(true);
+  };
+
+  const generateRandomWords = () => {
+    const words = generate(wordCount);
+    return words.join(' ');
+  };
+
+  const getRandomQuote = async () => {
+    // TODO: Fetch random quote from an API
+    return 'Failure is the stepping stone to success.';
+  };
+
+  useEffect(() => {
+    resetGame();
+  }, [wordCount, quote]);
+
+  const handleWordCountChange = (count: number | string) => {
+    const isQuote = typeof count !== 'number';
+    setQuote(isQuote);
+    setWordCount(isQuote ? 0 : count);
+    setShowFirstBar(count === 20);
+    setShowSecondBar(count === 30);
+    setShowQuote(isQuote && count === 'quote');
   };
 
   useEffect(() => {
@@ -103,10 +137,6 @@ function App() {
     };
   }, [input]);
 
-  const [showStatusBar, setShowStatusBar] = useState<Checked>(true);
-  const [showActivityBar, setShowActivityBar] = useState<Checked>(false);
-  const [showPanel, setShowPanel] = useState<Checked>(false);
-
   return (
     <div className="h-full flex flex-col items-center">
       <div className="container">
@@ -115,29 +145,31 @@ function App() {
         </div>
         <div className="mt-32 flex flex-col">
           <div className="flex flex-col items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="default">Change mode</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem checked={showStatusBar} onCheckedChange={setShowStatusBar}>
-                  Random 20 words
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem checked={showActivityBar} onCheckedChange={setShowActivityBar}>
-                  Random 50 words
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem checked={showPanel} onCheckedChange={setShowPanel}>
-                  Random qoute
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {showDropdown && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default">Change mode</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuCheckboxItem checked={showFirstBar} onCheckedChange={() => handleWordCountChange(20)}>
+                    Random 20 words
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem checked={showSecondBar} onCheckedChange={() => handleWordCountChange(30)}>
+                    Random 30 words
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem checked={showQuote} onCheckedChange={() => handleWordCountChange('quote')}>
+                    Random quote
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
-          <p className="ml-[0.5em] text-2xl">
-            {currentWordIndex} / {textWords.length}
-          </p>
+          {!showDropdown && (
+            <p className="ml-[0.5em] text-2xl">
+              {currentWordIndex} / {textWords.length}
+            </p>
+          )}
           <div className="words">
             {textWords.map((word, idx) => {
               return (
